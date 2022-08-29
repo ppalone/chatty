@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Lato&display=swap');
+
+    * {
+      box-sizing: border-box;
+      font-family: "Lato", sans-serif;
+      font-size: 1rem;
+    }
+
+    html,
+    body {
+      height: 100%;
+      min-height: 100%;
+      background-color: white;
+      padding: 0;
+      margin: 0;
+    }
+
+    #root {
+      height: 100%;
+    }
+
+    #container {
+      height: 100%;
+      width: 100%;
+      margin: 0 auto;
+
+      display: flex;
+      flex-direction: column;
+    }
+
+    #container>div {
+      padding: 0.5rem;
+    }
+
+    #messages {
+      flex: 1;
+      border-top: 1px solid gray;
+      border-bottom: 1px solid gray;
+      overflow-y: scroll;
+    }
+
+    #chat-input form {
+      display: flex;
+      gap: 0.25rem;
+    }
+
+    form #input {
+      flex: 1;
+    }
+
+    #input input {
+      width: 100%;
+      padding: 0.25rem;
+    }
+
+    #submit button {
+      height: 100%;
+    }
+
+    @media (min-width: 768px) {
+      #container {
+        width: 60%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- root -->
+  <div id="root">
+    <div id="container">
+      <!-- header -->
+      <div id="header">
+        Chat app
+      </div>
+
+      <!-- messages -->
+      <div id="messages">
+        <div class="message">Pranjal: Hi there!</div>
+      </div>
+
+      <!-- chat input -->
+      <div id="chat-input">
+        <form>
+          <div id="input">
+            <input type="text" placeholder="Say Hi! 👋">
+          </div>
+          <div id="submit">
+            <button type="submit">SEND</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    console.log("Hello!")
+  </script>
+</body>
+
+</html>
