@@ -12,24 +12,25 @@ type Client struct {
 	Conn *websocket.Conn
 
 	// send channel
-	Send chan Message
+	Send chan *Message
 
 	// Hub
 	Hub *Hub
 }
 
 type WSMessage struct {
-	Type    string
-	Payload interface{}
+	Type    string      `json:"type"`
+	Payload interface{} `json:"payload"`
 }
 
 func (c *Client) Read() {
 	defer func() {
 		// unregister client
-		c.Hub.Unregister <- *c
+		c.Hub.Unregister <- c
 		// close channel
 		close(c.Send)
 		// close websocket connection
+		c.Conn.Close()
 	}()
 	for {
 		var message WSMessage
@@ -40,7 +41,36 @@ func (c *Client) Read() {
 		}
 		switch message.Type {
 		case "message":
-			log.Println(message.Payload)
+			var m *Message = &Message{
+				Body: message.Payload.(string),
+			}
+			// Send it to broadcast channel
+			log.Println("Message", m)
+			c.Hub.Broadcast <- m
+		}
+	}
+}
+
+func (c *Client) Write() {
+A:
+	for {
+		select {
+		case m, ok := <-c.Send:
+			if !ok {
+				c.Hub.Unregister <- c
+				c.Conn.Close()
+				break A
+			}
+			log.Println("Write message:", m)
+			var message *WSMessage = &WSMessage{
+				Type:    "message",
+				Payload: m.Body,
+			}
+			err := c.Conn.WriteJSON(message)
+			if err != nil {
+				log.Println("Error while writing message:", err)
+				break A
+			}
 		}
 	}
 }

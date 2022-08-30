@@ -23,22 +23,23 @@ func ws(w http.ResponseWriter, r *http.Request, hub *Hub) {
 	// new client
 	client := &Client{
 		Conn: conn,
-		Send: make(chan Message),
+		Send: make(chan *Message),
 		Hub:  hub,
 	}
 
 	// register client to hub
-	client.Hub.Register <- *client
+	client.Hub.Register <- client
 
 	go client.Read()
+	go client.Write()
 }
 
 func main() {
 	hub := &Hub{
 		Clients:    make(map[*Client]bool),
-		Register:   make(chan Client),
-		Unregister: make(chan Client),
-		Broadcast:  make(chan Message),
+		Register:   make(chan *Client),
+		Unregister: make(chan *Client),
+		Broadcast:  make(chan *Message),
 		mutex:      &sync.RWMutex{},
 	}
 	go hub.Run()

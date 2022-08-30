@@ -103,7 +103,25 @@
   </div>
 
   <script>
-    console.log("Hello!")
+    const url = new URL(window.location.href);
+    const wsURL = (url.protocol === "https:" ? "wss://" : "ws://") + (url.host) + "/ws"
+    const ws = new WebSocket(wsURL)
+    const form = document.querySelector("form")
+    ws.addEventListener("open", function () {
+      console.log("Connected!")
+    })
+    ws.addEventListener("message", function (message) {
+      console.log(JSON.parse(message.data))
+    })
+    form.onsubmit = function (e) {
+      e.preventDefault();
+      const message = document.querySelector("input")
+      const m = {
+        type: "message",
+        payload: message.value
+      }
+      ws.send(JSON.stringify(m))
+    }
   </script>
 </body>
 
