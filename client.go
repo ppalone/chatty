@@ -54,6 +54,9 @@ func (c *Client) Read() {
 }
 
 func (c *Client) Write() {
+	defer func() {
+		c.Hub.Unregister <- c
+	}()
 A:
 	for {
 		select {
