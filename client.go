@@ -19,8 +19,8 @@ type Client struct {
 }
 
 type WSMessage struct {
-	Type    string      `json:"type"`
-	Payload interface{} `json:"payload"`
+	Type    string  `json:"type"`
+	Payload Message `json:"payload"`
 }
 
 func (c *Client) Read() {
@@ -39,10 +39,12 @@ func (c *Client) Read() {
 			log.Println("Error while reading websocket message: ", err)
 			break
 		}
+		log.Println(message)
 		switch message.Type {
 		case "message":
 			var m *Message = &Message{
-				Body: message.Payload.(string),
+				Body: message.Payload.Body,
+				By:   message.Payload.By,
 			}
 			// Send it to broadcast channel
 			log.Println("Message", m)
@@ -64,7 +66,7 @@ A:
 			log.Println("Write message:", m)
 			var message *WSMessage = &WSMessage{
 				Type:    "message",
-				Payload: m.Body,
+				Payload: *m,
 			}
 			err := c.Conn.WriteJSON(message)
 			if err != nil {

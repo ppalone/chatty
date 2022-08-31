@@ -66,6 +66,11 @@
       height: 100%;
     }
 
+    .message {
+      padding: 0.5rem 0;
+      border-bottom: 1px solid rgba(200, 200, 200, 0.25);
+    }
+
     @media (min-width: 768px) {
       #container {
         width: 60%;
@@ -85,7 +90,6 @@
 
       <!-- messages -->
       <div id="messages">
-        <div class="message">Pranjal: Hi there!</div>
       </div>
 
       <!-- chat input -->
@@ -103,24 +107,49 @@
   </div>
 
   <script>
+    let username = localStorage.getItem("chatty-username")
+    while (!username || !username.trim()) {
+      username = prompt("Enter a username")
+      if (username.trim()) {
+        localStorage.setItem("chatty-username", username.trim())
+      }
+    }
+
     const url = new URL(window.location.href);
     const wsURL = (url.protocol === "https:" ? "wss://" : "ws://") + (url.host) + "/ws"
     const ws = new WebSocket(wsURL)
     const form = document.querySelector("form")
+
     ws.addEventListener("open", function () {
       console.log("Connected!")
     })
+
     ws.addEventListener("message", function (message) {
       console.log(JSON.parse(message.data))
+      const data = JSON.parse(message.data)
+      add(data.payload)
     })
+
     form.onsubmit = function (e) {
       e.preventDefault();
       const message = document.querySelector("input")
       const m = {
         type: "message",
-        payload: message.value
+        payload: {
+          body: message.value,
+          by: username
+        }
       }
+      console.log(m)
       ws.send(JSON.stringify(m))
+    }
+
+    function add(message) {
+      const messages = document.querySelector("#messages")
+      const ele = document.createElement("div")
+      ele.className = "message"
+      ele.textContent = message.by + ": " + message.body
+      messages.appendChild(ele)
     }
   </script>
 </body>
