@@ -3,6 +3,8 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
+	"strings"
 	"sync"
 
 	"github.com/gorilla/websocket"
@@ -35,6 +37,10 @@ func ws(w http.ResponseWriter, r *http.Request, hub *Hub) {
 }
 
 func main() {
+	port := os.Getenv("PORT")
+	if strings.Trim(port, " ") == "" {
+		port = "8000"
+	}
 	hub := &Hub{
 		Clients:    make(map[*Client]bool),
 		Register:   make(chan *Client),
@@ -49,5 +55,5 @@ func main() {
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		ws(w, r, hub)
 	})
-	log.Fatalln(http.ListenAndServe(":8000", nil))
+	log.Fatalln(http.ListenAndServe(":"+port, nil))
 }
