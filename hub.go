@@ -35,6 +35,7 @@ func (h *Hub) add(c *Client) {
 func (h *Hub) delete(c *Client) {
 	h.mutex.Lock()
 	delete(h.Clients, c)
+	c.Conn.Close()
 	h.mutex.Unlock()
 	log.Println("Removed client from Hub")
 }

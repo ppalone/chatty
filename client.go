@@ -29,15 +29,13 @@ func (c *Client) Read() {
 		c.Hub.Unregister <- c
 		// close channel
 		close(c.Send)
-		// close websocket connection
-		c.Conn.Close()
 	}()
 	for {
 		var message WSMessage
 		err := c.Conn.ReadJSON(&message)
 		if err != nil {
 			log.Println("Error while reading websocket message: ", err)
-			break
+			return
 		}
 		log.Println(message)
 		switch message.Type {
@@ -55,27 +53,23 @@ func (c *Client) Read() {
 
 func (c *Client) Write() {
 	defer func() {
-		c.Hub.Unregister <- c
+		c.Conn.Close()
 	}()
-A:
 	for {
-		select {
-		case m, ok := <-c.Send:
-			if !ok {
-				c.Hub.Unregister <- c
-				c.Conn.Close()
-				break A
-			}
-			log.Println("Write message:", m)
-			var message *WSMessage = &WSMessage{
-				Type:    "message",
-				Payload: *m,
-			}
-			err := c.Conn.WriteJSON(message)
-			if err != nil {
-				log.Println("Error while writing message:", err)
-				break A
-			}
+		m, ok := <-c.Send
+		if !ok {
+			log.Println("Send Channel was closed")
+			return
+		}
+		log.Println("Write message:", m)
+		var message *WSMessage = &WSMessage{
+			Type:    "message",
+			Payload: *m,
+		}
+		err := c.Conn.WriteJSON(message)
+		if err != nil {
+			log.Println("Error while writing message:", err)
+			return
 		}
 	}
 }
