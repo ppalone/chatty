@@ -34,11 +34,21 @@
       margin: 0 auto;
 
       display: flex;
-      flex-direction: column;
     }
 
     #container>div {
       padding: 0.5rem;
+    }
+
+    #rooms {
+      width: 200px;
+    }
+
+    #wrapper {
+      flex: 1;
+
+      display: flex;
+      flex-direction: column;
     }
 
     #messages {
@@ -51,6 +61,7 @@
     #chat-input form {
       display: flex;
       gap: 0.25rem;
+      padding-top: 0.5rem;
     }
 
     form #input {
@@ -71,10 +82,13 @@
       border-bottom: 1px solid rgba(200, 200, 200, 0.25);
     }
 
-    @media (min-width: 768px) {
-      #container {
-        width: 60%;
-      }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    ul li {
+      padding: 0.25rem;
     }
   </style>
 </head>
@@ -83,30 +97,48 @@
   <!-- root -->
   <div id="root">
     <div id="container">
-      <!-- header -->
-      <div id="header">
-        Chat app
+      <!-- Rooms -->
+      <div id="rooms">
+        <div>Rooms</div>
+        <ul></ul>
       </div>
 
-      <!-- messages -->
-      <div id="messages">
-      </div>
+      <!-- Wrapper -->
+      <div id="wrapper">
+        <!-- header -->
+        <div id="header">
+          Chat app
+        </div>
 
-      <!-- chat input -->
-      <div id="chat-input">
-        <form>
-          <div id="input">
-            <input type="text" placeholder="Say Hi! 👋">
-          </div>
-          <div id="submit">
-            <button type="submit">SEND</button>
-          </div>
-        </form>
+        <!-- messages -->
+        <div id="messages">
+        </div>
+
+        <!-- chat input -->
+        <div id="chat-input">
+          <form>
+            <div id="input">
+              <input type="text" placeholder="Say Hi! 👋">
+            </div>
+            <div id="submit">
+              <button type="submit">SEND</button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   </div>
 
   <script>
+
+    // Rooms
+    const rooms = [
+      "general",
+      "ideas",
+      "projects",
+      "music"
+    ]
+
     let username = localStorage.getItem("chatty-username")
     while (!username || !username.trim()) {
       username = prompt("Enter a username")
@@ -116,9 +148,21 @@
     }
 
     const url = new URL(window.location.href);
-    const wsURL = (url.protocol === "https:" ? "wss://" : "ws://") + (url.host) + "/ws"
+    const wsURL = (url.protocol === "https:" ? "wss://" : "ws://") + (url.host) + "/ws" + (url.pathname)
     const ws = new WebSocket(wsURL)
+    const room = url.pathname.replace("/", "")
+
     const form = document.querySelector("form")
+    const roomList = document.querySelector("ul")
+
+    rooms.forEach(r => {
+      const item = document.createElement("li")
+      const a = document.createElement("a")
+      a.setAttribute("href", "/" + r)
+      a.textContent = "#" + r
+      item.appendChild(a)
+      roomList.appendChild(item)
+    })
 
     ws.addEventListener("open", function () {
       console.log("Connected!")
@@ -127,7 +171,13 @@
     ws.addEventListener("message", function (message) {
       console.log(JSON.parse(message.data))
       const data = JSON.parse(message.data)
-      add(data.payload)
+      switch (data.type) {
+        case "message":
+          add(data.payload)
+          break
+        default:
+          break
+      }
     })
 
     form.onsubmit = function (e) {
@@ -137,7 +187,8 @@
         type: "message",
         payload: {
           body: message.value,
-          by: username
+          by: username,
+          room
         }
       }
       console.log(m)
@@ -145,6 +196,7 @@
     }
 
     function add(message) {
+      console.log("Add message: ", message)
       const messages = document.querySelector("#messages")
       const ele = document.createElement("div")
       ele.className = "message"

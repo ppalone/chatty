@@ -15,7 +15,7 @@ var upgrader *websocket.Upgrader = &websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-func ws(w http.ResponseWriter, r *http.Request, hub *Hub) {
+func ws(w http.ResponseWriter, r *http.Request, hub *Hub, room string) {
 	// upgrade http request to websocket connection
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -27,6 +27,7 @@ func ws(w http.ResponseWriter, r *http.Request, hub *Hub) {
 		Conn: conn,
 		Send: make(chan *Message),
 		Hub:  hub,
+		Room: room,
 	}
 
 	// register client to hub
@@ -42,7 +43,7 @@ func main() {
 		port = "8000"
 	}
 	hub := &Hub{
-		Clients:    make(map[*Client]bool),
+		Clients:    make(map[string]map[*Client]bool),
 		Register:   make(chan *Client),
 		Unregister: make(chan *Client),
 		Broadcast:  make(chan *Message),
@@ -50,10 +51,19 @@ func main() {
 	}
 	go hub.Run()
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/" {
+			http.Redirect(w, r, "/general", http.StatusTemporaryRedirect)
+			return
+		}
 		http.ServeFile(w, r, "index.html")
 	})
-	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		ws(w, r, hub)
+	http.HandleFunc("/ws/", func(w http.ResponseWriter, r *http.Request) {
+		t := strings.Split(strings.Trim(r.URL.Path, " "), "/")
+		room := "general"
+		if len(t) > 2 && t[2] != "" {
+			room = t[2]
+		}
+		ws(w, r, hub, room)
 	})
 	log.Fatalln(http.ListenAndServe(":"+port, nil))
 }

@@ -16,6 +16,9 @@ type Client struct {
 
 	// Hub
 	Hub *Hub
+
+	// Room name
+	Room string
 }
 
 type WSMessage struct {
@@ -43,6 +46,7 @@ func (c *Client) Read() {
 			var m *Message = &Message{
 				Body: message.Payload.Body,
 				By:   message.Payload.By,
+				Room: message.Payload.Room,
 			}
 			// Send it to broadcast channel
 			log.Println("Message", m)

@@ -8,7 +8,7 @@ import (
 // Hub.
 type Hub struct {
 	// clients
-	Clients map[*Client]bool
+	Clients map[string]map[*Client]bool
 
 	// register channel
 	Register chan *Client
@@ -26,24 +26,31 @@ type Hub struct {
 // Add client to Hub.
 func (h *Hub) add(c *Client) {
 	h.mutex.Lock()
-	h.Clients[c] = true
+	if _, ok := h.Clients[c.Room]; !ok {
+		h.Clients[c.Room] = make(map[*Client]bool)
+	}
+	h.Clients[c.Room][c] = true
 	h.mutex.Unlock()
-	log.Println("Added client to Hub", h.Clients)
+	log.Printf("Client added to room #%s, Number of clients in room: %d\n", c.Room, len(h.Clients[c.Room]))
 }
 
 // Remove client from Hub.
 func (h *Hub) delete(c *Client) {
 	h.mutex.Lock()
-	delete(h.Clients, c)
-	c.Conn.Close()
+	if clients, ok := h.Clients[c.Room]; ok {
+		delete(clients, c)
+		c.Conn.Close()
+	}
 	h.mutex.Unlock()
-	log.Println("Removed client from Hub")
+	log.Printf("Removed client from room #%s, Number of clients in Room: %d\n", c.Room, len(h.Clients[c.Room]))
 }
 
 // Broadcast message to all connected clients.
 func (h *Hub) broadcast(m *Message) {
-	for k := range h.Clients {
-		k.Send <- m
+	if clients, ok := h.Clients[m.Room]; ok {
+		for k := range clients {
+			k.Send <- m
+		}
 	}
 }
 
