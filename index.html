@@ -131,7 +131,7 @@
 
         <!-- chat input -->
         <div id="chat-input">
-          <div class="typing">Your daddy is typing ...</div>
+          <div class="typing"></div>
           <form>
             <div id="input">
               <input type="text" placeholder="Say Hi! 👋">
@@ -235,6 +235,7 @@
       }
       console.log(m)
       ws.send(JSON.stringify(m))
+      messageInput.value = ""
     }
 
     function join(message) {
