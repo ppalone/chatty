@@ -45,6 +45,7 @@ func (c *Client) Read() {
 		}
 		log.Println(message)
 		switch message.Type {
+
 		case "join":
 			log.Println("User joined", message.Payload)
 			c.Username = message.Payload.By
@@ -56,6 +57,7 @@ func (c *Client) Read() {
 				},
 			}
 			c.Hub.Broadcast <- m
+
 		case "message":
 			var m *WSMessage = &WSMessage{
 				Type: "message",
@@ -65,8 +67,28 @@ func (c *Client) Read() {
 					Room: message.Payload.Room,
 				},
 			}
-			// Send it to broadcast channel
-			log.Println("Message", m)
+			c.Hub.Broadcast <- m
+
+		case "typing":
+			var m *WSMessage = &WSMessage{
+				Type: message.Type,
+				Payload: Message{
+					By:   c.Username,
+					Room: message.Payload.Room,
+				},
+			}
+			log.Println("Typing:", m)
+			c.Hub.Broadcast <- m
+
+		case "stoptyping":
+			var m *WSMessage = &WSMessage{
+				Type: message.Type,
+				Payload: Message{
+					By:   c.Username,
+					Room: message.Payload.Room,
+				},
+			}
+			log.Println("StopTyping:", m)
 			c.Hub.Broadcast <- m
 		}
 	}

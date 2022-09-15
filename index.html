@@ -67,7 +67,7 @@
     #chat-input form {
       display: flex;
       gap: 0.25rem;
-      padding-top: 0.5rem;
+      padding-top: 0.25rem;
     }
 
     form #input {
@@ -100,6 +100,11 @@
     ul li {
       padding: 0.25rem;
     }
+
+    .typing {
+      color: rgba(50, 50, 50, 0.75);
+      font-size: 0.8rem;
+    }
   </style>
 </head>
 
@@ -126,6 +131,7 @@
 
         <!-- chat input -->
         <div id="chat-input">
+          <div class="typing">Your daddy is typing ...</div>
           <form>
             <div id="input">
               <input type="text" placeholder="Say Hi! 👋">
@@ -165,6 +171,10 @@
     const form = document.querySelector("form")
     const roomList = document.querySelector("ul")
     const header = document.querySelector("#header")
+    const messageInput = document.querySelector("input")
+    const ty = document.querySelector(".typing")
+
+    let currentTyping
 
     header.textContent = "#" + room
 
@@ -202,6 +212,12 @@
         case "message":
           add(data.payload)
           break
+        case "typing":
+          typing(data.payload)
+          break
+        case "stoptyping":
+          stoptyping(data.payload)
+          break
         default:
           break
       }
@@ -209,11 +225,10 @@
 
     form.onsubmit = function (e) {
       e.preventDefault();
-      const message = document.querySelector("input")
       const m = {
         type: "message",
         payload: {
-          body: message.value,
+          body: messageInput.value,
           by: username,
           room
         }
@@ -246,6 +261,44 @@
       ele.textContent = "🤖: " + message.by + " has left the room"
       messages.appendChild(ele)
     }
+
+    function typing(message) {
+      console.log("typing: ", message)
+      if (message.by === username) return;
+      ty.textContent = message.by + " is typing ..."
+      currentTyping = message.by
+      console.log("Currently typing: ", currentTyping)
+    }
+
+    function stoptyping(message) {
+      console.log("stoptyping: ", message)
+      if (message.by === username) return
+      if (message.by !== currentTyping) return
+      ty.textContent = ""
+      currentTyping = null
+    }
+
+    messageInput.addEventListener("focusin", function () {
+      console.log("Focus in")
+      const m = {
+        type: "typing",
+        payload: {
+          room,
+        }
+      }
+      ws.send(JSON.stringify(m))
+    })
+
+    messageInput.addEventListener("focusout", function () {
+      console.log("Focus out")
+      const m = {
+        type: "stoptyping",
+        payload: {
+          room,
+        }
+      }
+      ws.send(JSON.stringify(m))
+    })
   </script>
 </body>
 
