@@ -25,7 +25,7 @@ func ws(w http.ResponseWriter, r *http.Request, hub *Hub, room string) {
 	// new client
 	client := &Client{
 		Conn: conn,
-		Send: make(chan *Message),
+		Send: make(chan *WSMessage),
 		Hub:  hub,
 		Room: room,
 	}
@@ -46,7 +46,7 @@ func main() {
 		Clients:    make(map[string]map[*Client]bool),
 		Register:   make(chan *Client),
 		Unregister: make(chan *Client),
-		Broadcast:  make(chan *Message),
+		Broadcast:  make(chan *WSMessage),
 		mutex:      &sync.RWMutex{},
 	}
 	go hub.Run()

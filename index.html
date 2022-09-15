@@ -58,6 +58,12 @@
       overflow-y: scroll;
     }
 
+    #header {
+      font-size: 1.25rem;
+      font-weight: 700;
+      padding: 0.5rem 0;
+    }
+
     #chat-input form {
       display: flex;
       gap: 0.25rem;
@@ -80,6 +86,10 @@
     .message {
       padding: 0.5rem 0;
       border-bottom: 1px solid rgba(200, 200, 200, 0.25);
+    }
+
+    .add-message {
+      text-align: center;
     }
 
     ul {
@@ -107,7 +117,7 @@
       <div id="wrapper">
         <!-- header -->
         <div id="header">
-          Chat app
+          #general
         </div>
 
         <!-- messages -->
@@ -154,6 +164,9 @@
 
     const form = document.querySelector("form")
     const roomList = document.querySelector("ul")
+    const header = document.querySelector("#header")
+
+    header.textContent = "#" + room
 
     rooms.forEach(r => {
       const item = document.createElement("li")
@@ -165,13 +178,27 @@
     })
 
     ws.addEventListener("open", function () {
-      console.log("Connected!")
+      const m = {
+        type: "join",
+        payload: {
+          by: username,
+          room: room
+        }
+      }
+      ws.send(JSON.stringify(m))
     })
 
     ws.addEventListener("message", function (message) {
       console.log(JSON.parse(message.data))
       const data = JSON.parse(message.data)
       switch (data.type) {
+        case "join":
+          console.log("Join")
+          join(data.payload)
+          break
+        case "left":
+          left(data.payload)
+          break
         case "message":
           add(data.payload)
           break
@@ -195,12 +222,28 @@
       ws.send(JSON.stringify(m))
     }
 
+    function join(message) {
+      const messages = document.querySelector("#messages")
+      const ele = document.createElement("div")
+      ele.classList.add("message", "add-message")
+      ele.textContent = "🤖: " + message.by + " has joined the room"
+      messages.appendChild(ele)
+    }
+
     function add(message) {
       console.log("Add message: ", message)
       const messages = document.querySelector("#messages")
       const ele = document.createElement("div")
       ele.className = "message"
       ele.textContent = message.by + ": " + message.body
+      messages.appendChild(ele)
+    }
+
+    function left(message) {
+      const messages = document.querySelector("#messages")
+      const ele = document.createElement("div")
+      ele.classList.add("message", "add-message")
+      ele.textContent = "🤖: " + message.by + " has left the room"
       messages.appendChild(ele)
     }
   </script>

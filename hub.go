@@ -17,7 +17,7 @@ type Hub struct {
 	Unregister chan *Client
 
 	// broadcast channel
-	Broadcast chan *Message
+	Broadcast chan *WSMessage
 
 	// mutex
 	mutex *sync.RWMutex
@@ -42,12 +42,20 @@ func (h *Hub) delete(c *Client) {
 		c.Conn.Close()
 	}
 	h.mutex.Unlock()
+	var m *WSMessage = &WSMessage{
+		Type: "left",
+		Payload: Message{
+			By:   c.Username,
+			Room: c.Room,
+		},
+	}
+	h.broadcast(m)
 	log.Printf("Removed client from room #%s, Number of clients in Room: %d\n", c.Room, len(h.Clients[c.Room]))
 }
 
 // Broadcast message to all connected clients.
-func (h *Hub) broadcast(m *Message) {
-	if clients, ok := h.Clients[m.Room]; ok {
+func (h *Hub) broadcast(m *WSMessage) {
+	if clients, ok := h.Clients[m.Payload.Room]; ok {
 		for k := range clients {
 			k.Send <- m
 		}
