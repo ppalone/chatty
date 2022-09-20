@@ -1,6 +1,7 @@
 package main
 
 import (
+	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -55,7 +56,25 @@ func main() {
 			http.Redirect(w, r, "/general", http.StatusTemporaryRedirect)
 			return
 		}
-		http.ServeFile(w, r, "index.html")
+
+		tmp, err := template.ParseFiles("index.html")
+		if err != nil {
+			log.Println(err)
+			w.Write([]byte("Server Internal Error"))
+			return
+		}
+
+		room := strings.Split(r.URL.Path, "/")[1]
+		users := len(hub.Clients[room])
+
+		if err := tmp.Execute(w, map[string]interface{}{
+			"room":  strings.Split(r.URL.Path, "/")[1],
+			"users": users,
+		}); err != nil {
+			log.Println(err)
+			w.Write([]byte("Server Internal Error"))
+			return
+		}
 	})
 	http.HandleFunc("/ws/", func(w http.ResponseWriter, r *http.Request) {
 		t := strings.Split(strings.Trim(r.URL.Path, " "), "/")
