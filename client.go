@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"strconv"
 
 	"github.com/gorilla/websocket"
 )
@@ -52,6 +53,7 @@ func (c *Client) Read() {
 			var m *WSMessage = &WSMessage{
 				Type: "join",
 				Payload: Message{
+					Body: strconv.Itoa(len(c.Hub.Clients[message.Payload.Room])),
 					By:   message.Payload.By,
 					Room: message.Payload.Room,
 				},

@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"strconv"
 	"sync"
 )
 
@@ -45,6 +46,7 @@ func (h *Hub) delete(c *Client) {
 	var m *WSMessage = &WSMessage{
 		Type: "left",
 		Payload: Message{
+			Body: strconv.Itoa(len(h.Clients[c.Room])),
 			By:   c.Username,
 			Room: c.Room,
 		},

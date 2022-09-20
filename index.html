@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chat</title>
+  <title>Chatty</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Lato&display=swap');
 
@@ -56,6 +56,12 @@
       border-top: 1px solid gray;
       border-bottom: 1px solid gray;
       overflow-y: scroll;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
     #header {
@@ -121,9 +127,15 @@
       <!-- Wrapper -->
       <div id="wrapper">
         <!-- header -->
-        <div id="header">
-          #general
-        </div>
+        <header>
+          <div id="header">
+            #{{ .room }}
+          </div>
+
+          <div>
+            <span id="online">{{ .users }}</span> online
+          </div>
+        </header>
 
         <!-- messages -->
         <div id="messages">
@@ -173,10 +185,9 @@
     const header = document.querySelector("#header")
     const messageInput = document.querySelector("input")
     const ty = document.querySelector(".typing")
+    const online = document.querySelector("#online")
 
     let currentTyping
-
-    header.textContent = "#" + room
 
     rooms.forEach(r => {
       const item = document.createElement("li")
@@ -244,6 +255,7 @@
       ele.classList.add("message", "add-message")
       ele.textContent = "🤖: " + message.by + " has joined the room"
       messages.appendChild(ele)
+      online.textContent = parseInt(message.body, 10)
     }
 
     function add(message) {
@@ -261,6 +273,7 @@
       ele.classList.add("message", "add-message")
       ele.textContent = "🤖: " + message.by + " has left the room"
       messages.appendChild(ele)
+      online.textContent = parseInt(message.body, 10)
     }
 
     function typing(message) {
