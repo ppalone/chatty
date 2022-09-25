@@ -4,7 +4,8 @@
   "description": "Group chat app (Golang + Websockets)",
   "main": "index.js",
   "scripts": {
-    "dev": "rollup -c -w"
+    "dev": "rollup -c -w",
+    "build": "rollup -c"
   },
   "repository": {
     "type": "git",
