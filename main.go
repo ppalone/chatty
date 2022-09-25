@@ -43,6 +43,11 @@ func main() {
 	if strings.Trim(port, " ") == "" {
 		port = "8000"
 	}
+
+	fs := http.FileServer(http.Dir("./build"))
+
+	http.Handle("/build/", http.StripPrefix("/build/", fs))
+
 	hub := &Hub{
 		Clients:    make(map[string]map[*Client]bool),
 		Register:   make(chan *Client),
@@ -51,6 +56,7 @@ func main() {
 		mutex:      &sync.RWMutex{},
 	}
 	go hub.Run()
+
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/" {
 			http.Redirect(w, r, "/general", http.StatusTemporaryRedirect)
@@ -76,6 +82,7 @@ func main() {
 			return
 		}
 	})
+
 	http.HandleFunc("/ws/", func(w http.ResponseWriter, r *http.Request) {
 		t := strings.Split(strings.Trim(r.URL.Path, " "), "/")
 		room := "general"
@@ -84,5 +91,6 @@ func main() {
 		}
 		ws(w, r, hub, room)
 	})
+
 	log.Fatalln(http.ListenAndServe(":"+port, nil))
 }

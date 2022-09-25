@@ -1,0 +1,31 @@
+{
+  "name": "chatty",
+  "version": "1.0.0",
+  "description": "Group chat app (Golang + Websockets)",
+  "main": "index.js",
+  "scripts": {
+    "dev": "rollup -c -w"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ppalone/chatty.git"
+  },
+  "keywords": [
+    "rollup",
+    "pug",
+    "sass"
+  ],
+  "author": "Pranjal Alone <pranjalalone@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ppalone/chatty/issues"
+  },
+  "homepage": "https://github.com/ppalone/chatty#readme",
+  "devDependencies": {
+    "rollup": "^2.79.1"
+  },
+  "dependencies": {
+    "pug": "^3.0.2",
+    "sass": "^1.55.0"
+  }
+}
