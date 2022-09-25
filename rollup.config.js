@@ -1,17 +1,5 @@
-import fs from "node:fs"
-import path from "node:path"
-
-function css() {
-  return {
-    name: "rollup-plugin-css",
-    generateBundle() {
-      fs.copyFileSync(
-        path.resolve("./public/style.css"),
-        path.resolve("./build/style.css")
-      )
-    }
-  }
-}
+import sass from "./plugins/sass"
+import pug from "./plugins/pug"
 
 export default {
   input: "./public/index.js",
@@ -19,6 +7,7 @@ export default {
     dir: "build",
   },
   plugins: [
-    css(),
+    sass(),
+    pug()
   ]
 }
