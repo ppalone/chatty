@@ -1,0 +1,11 @@
+[phases.setup]
+nixPkgs = ["nodejs", "yarn", "go"]
+
+[phases.install]
+  cmds = ["yarn install", "go mod tidy"]
+  
+[phases.build]
+  cmds = ["yarn build"]
+  
+[start]
+  cmd = "./chatty"
