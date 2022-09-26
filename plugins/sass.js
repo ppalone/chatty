@@ -8,13 +8,12 @@ export default function plugin() {
     buildStart() {
       this.addWatchFile(path.join(__dirname, "public", "styles.sass"))
     },
-    async generateBundle() {
-      try {
-        const result = await sass.compileAsync(path.join(__dirname, "public", "styles.sass"))
-        fs.writeFileSync(path.join(__dirname, "build", "style.css"), result.css)
-      } catch (err) {
-        console.error(err)
+    generateBundle() {
+      const result = sass.compile(path.join(__dirname, "public", "styles.sass"))
+      if (!fs.existsSync(path.join(__dirname, "build"))) {
+        fs.mkdirSync(path.join(__dirname, "build"))
       }
+      fs.writeFileSync(path.join(__dirname, "build", "style.css"), result.css)
     }
   }
 }
