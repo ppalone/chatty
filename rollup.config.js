@@ -7,7 +7,7 @@ export default {
     dir: "build",
   },
   plugins: [
-    sass(),
-    pug()
+    pug(),
+    sass()
   ]
 }
